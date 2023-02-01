@@ -2,6 +2,8 @@ import java.text.NumberFormat;
 import java.util.Scanner;
 
 public class Main {
+    final static byte monthsInYear = 12;
+    final static byte percent = 100;
         public static void main(String[] args) {
 
             int principal = (int) readNumber("Principal ($1K - $1M): ", 1_000, 1_000_000);
@@ -9,9 +11,19 @@ public class Main {
             byte years = (byte) readNumber("Period (Years): ", 1, 30);
 
             double mortgage = calculateMortgage(principal, annualInterest, years);
+            NumberFormat mortgageFormatted = NumberFormat.getCurrencyInstance();
+            System.out.println();
+            System.out.println("MORTGAGE");
+            System.out.println("________");
+            System.out.println("Your mortgage payment will be " + mortgageFormatted.format(mortgage));
 
-                NumberFormat mortgageFormatted = NumberFormat.getCurrencyInstance();
-                System.out.println("Your mortgage payment will be " + mortgageFormatted.format(mortgage));
+            System.out.println();
+            System.out.println("PAYMENT SCHEDULE");
+            System.out.println("_________________");
+            for (short month = 1; month <= years * monthsInYear; month++) {
+                double balance = calculateRemainingBalance(principal, annualInterest, years, month);
+                System.out.println(NumberFormat.getCurrencyInstance().format(balance));
+            }
         }
 
         public static double readNumber(String prompt, double min, double max) {
@@ -32,9 +44,6 @@ public class Main {
                 float annualInterest,
                 byte years) {
 
-            final byte monthsInYear = 12;
-            final byte percent = 100;
-
             float monthlyInterest = (annualInterest / percent) / monthsInYear;
             short numberOfPayments = (short)(years * monthsInYear);
 
@@ -43,5 +52,22 @@ public class Main {
                     / (Math.pow((1 + monthlyInterest), numberOfPayments) - 1);
 
             return mortgage;
+        }
+
+    public static double calculateRemainingBalance(
+            int principal,
+            float annualInterest,
+            byte years,
+            short numberOfPaymentsMade) {
+
+        float monthlyInterest = (annualInterest / percent) / monthsInYear;
+        short numberOfPayments = (short)(years * monthsInYear);
+
+        double balance = principal
+                * (Math.pow(1 + monthlyInterest, numberOfPayments)
+                - Math.pow(1 + monthlyInterest, numberOfPaymentsMade))
+                / (Math.pow(1 + monthlyInterest, numberOfPayments) - 1);
+
+        return balance;
         }
     }
